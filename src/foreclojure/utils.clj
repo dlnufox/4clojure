@@ -19,6 +19,8 @@
             [foreclojure.ring-utils   :only [*url* static-url]]
             [foreclojure.config       :only [config repo-url]]))
 
+(def ^:dynamic *loging* true)
+
 (defn as-int [s]
   (if (integer? s) s,
       (try (Integer. s)
@@ -214,3 +216,13 @@
   (if-user [{:keys [theme]}]
     (or theme default-theme)
     default-theme))
+
+(defn my-log
+  [description argument]
+  (when *loging*
+    (do
+      (println "\n=============================================================================")
+      (println description "\t argument: " argument)
+      (println "===============================================================================\n")
+      )))
+

@@ -13,7 +13,9 @@
             [foreclojure.settings       :only [settings-routes]]
             [foreclojure.register       :only [register-routes]]
             [foreclojure.golf           :only [golf-routes]]
-            [foreclojure.ring           :only [resources wrap-strip-trailing-slash wrap-url-as-file wrap-versioned-expiry split-hosts wrap-404 wrap-debug]]
+            [foreclojure.ring           :only [resources wrap-strip-trailing-slash wrap-url-as-file
+                                               wrap-versioned-expiry split-hosts wrap-404 wrap-debug
+                                               test-middleware-2 test-middleware test-before]]
             [foreclojure.users          :only [users-routes]]
             [foreclojure.config         :only [config]]
             [foreclojure.social         :only [social-routes]]
@@ -27,6 +29,9 @@
             [ring.middleware.stacktrace :only [wrap-stacktrace]]
             [ring.middleware.file-info  :only [wrap-file-info]]
             [ring.middleware.gzip       :only [wrap-gzip]]
+            [ring.middleware.cookies    :only [wrap-cookies]]
+            [ring.middleware.session    :only [wrap-session]]
+            [ring.middleware.params    :only [wrap-params]]
             [mongo-session.core         :only [mongo-session]]))
 
 (def ^:dynamic *block-server* false)
@@ -83,6 +88,12 @@
 
 (def app (-> (split-hosts host-handlers)
              wrap-404
+             test-middleware
+             test-middleware-2
+             (test-before "fuck it")
+             wrap-session
+             wrap-cookies
+             wrap-params
              wrap-gzip))
 
 (defn register-heartbeat []

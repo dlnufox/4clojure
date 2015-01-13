@@ -8,6 +8,7 @@
             [hiccup.core               :only [html]]
             [foreclojure.version-utils :only [strip-version-number]]
             [foreclojure.ring-utils    :only [get-host static-url]]
+            [foreclojure.utils         :only [my-log]]
             [useful.debug              :only [?]]
             [ring.util.response        :only [response]]))
 
@@ -55,6 +56,7 @@
             (update-in [:body] json/generate-string))))))
 
 (defn split-hosts [host-handlers]
+  (my-log "host-handlers" host-handlers)
   (let [default (:default host-handlers)]
     (fn [request]
       (let [host (get-host request)
@@ -71,5 +73,35 @@
      [:img {:style "margin-left: 18px;" :src (static-url "images/4clj-gus-confused-small.png")}]]]))
 
 (defn wrap-404 [handler]
+  (my-log "wrap-404" handler)
   (routes handler
           (route/not-found render-404)))
+
+(defn test-middleware [handler]
+  (fn [req]
+    (my-log "request 1 " req)
+    (let [response (handler req)]
+      (my-log "after wrap-json" response)
+      (assoc response :fuck-it true))))
+
+
+(defn test-middleware-2 [handler]
+  (fn [req]
+    (my-log "request 2 " req)
+      (let [{:keys [body status] :as resp} (handler req)]
+        (if (= status 200)
+          (do  #_(my-log "status" 200)
+            (my-log "response middleware 2" resp))
+          nil)
+        (assoc resp :before-test 999999999999999999))
+      ))
+
+(defn test-before [handler args]
+  (fn [req]
+    (my-log "test before" req)
+    (my-log "test before" args)
+      (-> req
+          (assoc :flagggggggggggggggggggggggggggggg true)
+          handler
+          #_(update-in [:body] #(.replace %1 "If you" "IF YOU")))
+    ))

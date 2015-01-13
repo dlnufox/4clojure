@@ -40,6 +40,7 @@
       {:main login-box})}))
 
 (defn do-login [user pwd]
+  (foreclojure.utils/my-log "login" user)
   (let [user (.toLowerCase user)
         {db-pwd :pwd} (from-mongo (fetch-one :users :where {:user user}))
         location (session/get :login-to)]

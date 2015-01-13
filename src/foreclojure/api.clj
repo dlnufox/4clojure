@@ -11,6 +11,7 @@
        (GET "/api/problem/:id" [id]
          (when-let [problem (fetch-one :problems :where {:_id (as-int id)
                                                          :approved true})]
+           (foreclojure.utils/my-log "problem" problem)
            {:body (-> problem
                       (dissoc :_id :approved)
                       (update-each [:restricted :tags]
