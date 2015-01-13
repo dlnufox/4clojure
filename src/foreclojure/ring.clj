@@ -50,10 +50,12 @@
 (let [content-type [:headers "Content-Type"]]
   (defn wrap-json [handler]
     (fn [request]
-      (when-let [resp (handler request)]
+      (when-let [resp1 (handler request)]
+        (let [resp (update-in resp1 [:body] #(assoc %1 :my-doc %2) "my doc")]
+        (my-log "before wrap-json " resp)
         (-> resp
             (assoc-in content-type "application/json")
-            (update-in [:body] json/generate-string))))))
+            (update-in [:body] json/generate-string)))))))
 
 (defn split-hosts [host-handlers]
   (my-log "host-handlers" host-handlers)
@@ -82,6 +84,7 @@
     (my-log "request 1 " req)
     (let [response (handler req)]
       (my-log "after wrap-json" response)
+      (my-log "type of resp request" (type (:body response)))
       (assoc response :fuck-it true))))
 
 
@@ -91,7 +94,9 @@
       (let [{:keys [body status] :as resp} (handler req)]
         (if (= status 200)
           (do  #_(my-log "status" 200)
-            (my-log "response middleware 2" resp))
+            (my-log "response middleware 2" resp)
+            (my-log "type of resp" (type (:body resp)))
+            )
           nil)
         (assoc resp :before-test 999999999999999999))
       ))
@@ -103,5 +108,5 @@
       (-> req
           (assoc :flagggggggggggggggggggggggggggggg true)
           handler
-          #_(update-in [:body] #(.replace %1 "If you" "IF YOU")))
+          (update-in [:body] #(.replace %1 "If you" "IF YOU")))
     ))
