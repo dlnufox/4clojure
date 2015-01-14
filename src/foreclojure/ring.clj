@@ -58,12 +58,16 @@
             (update-in [:body] json/generate-string)))))))
 
 (defn split-hosts [host-handlers]
-  (my-log "host-handlers" host-handlers)
   (let [default (:default host-handlers)]
     (fn [request]
       (let [host (get-host request)
-            handler (or (host-handlers host) default)]
-        (handler request)))))
+            handler (or (host-handlers host) default)
+            response (handler request)]
+        (println "*****BEFORE CORE HANDLER **********************************************************************************************")
+        (my-log "*****host-handlers" handler)
+        (my-log "*****handler request results" response)
+        (println "*****AFTER  CORE HANDLER **********************************************************************************************")
+        response))))
 
 (def render-404
   (html
@@ -101,12 +105,19 @@
         (assoc resp :before-test 999999999999999999))
       ))
 
+(defn print-x [x]
+  (my-log "my own print-x function" x)
+  x)
+
+(def print-x2 (fn [x] (my-log "my own print function 2" x) x))
+
 (defn test-before [handler args]
   (fn [req]
     (my-log "test before" req)
-    (my-log "test before" args)
       (-> req
           (assoc :flagggggggggggggggggggggggggggggg true)
           handler
+          print-x
+          print-x2
           (update-in [:body] #(.replace %1 "If you" "IF YOU")))
     ))
